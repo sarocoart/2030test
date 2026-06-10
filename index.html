@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>나의 '겉바속촉' 사회적 가면 & 속마음 번역기</title>
+  
+  <!-- Open Graph Tags -->
+  <meta property="og:title" content="나의 사회적 가면 & 속마음 번역기">
+  <meta property="og:description" content="당신의 영혼은 안전하십니까? 현대인 생존 테스트 시작하기">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1518655048521-f130df041f66?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
+  <meta property="og:url" content="https://social-mask-test.vercel.app">
+  
+  <!-- Web Fonts: Pretendard -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Intro Section -->
+    <section id="intro" class="screen active">
+      <div class="intro-container">
+        <h2 class="subtitle">당신의 영혼은 안전하십니까?</h2>
+        <h1 class="title">사회적 가면 &<br>속마음 번역기</h1>
+        <div class="image-wrapper">
+          <div class="glass-orb"></div>
+        </div>
+        <p class="description">사회생활, 인간관계, 직장에 지친 203040을 위한<br>현대인 생존 테스트</p>
+        <button id="start-btn" class="primary-btn pulse-anim">나의 가면 테스트 시작하기</button>
+      </div>
+    </section>
+
+    <!-- Quiz Section -->
+    <section id="quiz" class="screen hidden">
+      <div class="quiz-container">
+        <div class="progress-bar-container">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div class="question-counter">
+          <span id="current-q">1</span> / 12
+        </div>
+        <h2 id="question-text" class="question">질문 텍스트가 여기에 들어갑니다.</h2>
+        <div class="options">
+          <button class="option-btn" id="option-a">선택지 A</button>
+          <button class="option-btn" id="option-b">선택지 B</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Result Section -->
+    <section id="result" class="screen hidden">
+      <div class="result-container" id="result-capture-area">
+        <div class="receipt-header">
+          <h3>나의 사회적 가면 진단서</h3>
+          <p class="date" id="today-date"></p>
+        </div>
+        
+        <div class="result-title-box">
+          <p class="mbti-type" id="result-mbti">MBTI</p>
+          <h1 id="result-title" class="result-title">가면 페르소나 타이틀</h1>
+        </div>
+
+        <div class="translation-box">
+          <div class="mask-section">
+            <span class="label">사회용 멘트 (가면)</span>
+            <p id="result-mask" class="mask-text">"대박! 너무 멋져요!"</p>
+          </div>
+          <div class="divider"></div>
+          <div class="inner-section">
+            <span class="label">찐 속마음 (본심)</span>
+            <p id="result-inner" class="inner-text">(언제 끝나냐 집 가고 싶다)</p>
+          </div>
+        </div>
+
+        <div class="chemistry-box">
+          <div class="chem-item good">
+            <span class="chem-label">찰떡 궁합</span>
+            <span id="chem-good" class="chem-type">INFJ</span>
+          </div>
+          <div class="chem-item bad">
+            <span class="chem-label">파멸의 조합</span>
+            <span id="chem-bad" class="chem-type">ISTJ</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button id="copy-link-btn" class="secondary-btn">🔗 링크 복사하기</button>
+        <button id="retry-btn" class="tertiary-btn">🔄 다시 하기</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
