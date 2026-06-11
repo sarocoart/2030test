@@ -6,8 +6,8 @@
   <title>나의 '겉바속촉' 사회적 가면 & 속마음 번역기</title>
   
   <!-- Open Graph Tags -->
-  <meta property="og:title" content="나의 사회적 가면 & 속마음 번역기">
-  <meta property="og:description" content="당신의 영혼은 안전하십니까? 현대인 생존 테스트 시작하기">
+  <meta property="og:title" content="사회적 가면 & 속마음 번역기">
+  <meta property="og:description" content="사회생활, 인간관계, 직장에 지친 현대인 생존 테스트">
   <meta property="og:image" content="https://images.unsplash.com/photo-1518655048521-f130df041f66?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
   <meta property="og:url" content="https://social-mask-test.vercel.app">
   
@@ -18,79 +18,151 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app">
-    <!-- Intro Section -->
-    <section id="intro" class="screen active">
-      <div class="intro-container">
-        <h2 class="subtitle">당신의 영혼은 안전하십니까?</h2>
-        <h1 class="title">사회적 가면 &<br>속마음 번역기</h1>
-        <div class="image-wrapper">
-          <div class="glass-orb"></div>
-        </div>
-        <p class="description">사회생활, 인간관계, 직장에 지친 203040을 위한<br>현대인 생존 테스트</p>
-        <button id="start-btn" class="primary-btn pulse-anim">나의 가면 테스트 시작하기</button>
-      </div>
-    </section>
+  <!-- PC Sidebars Wrapper -->
+  <div class="page-wrapper">
+    <!-- Left Ad Sidebar -->
+    <aside class="ad-sidebar left-sidebar">
+      <div class="ad-placeholder vertical">[쿠팡 파트너스 배너 자리]</div>
+    </aside>
 
-    <!-- Quiz Section -->
-    <section id="quiz" class="screen hidden">
-      <div class="quiz-container">
-        <div class="progress-bar-container">
-          <div id="progress-bar" class="progress-bar"></div>
-        </div>
-        <div class="question-counter">
-          <span id="current-q">1</span> / 12
-        </div>
-        <h2 id="question-text" class="question">질문 텍스트가 여기에 들어갑니다.</h2>
-        <div class="options">
-          <button class="option-btn" id="option-a">선택지 A</button>
-          <button class="option-btn" id="option-b">선택지 B</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Result Section -->
-    <section id="result" class="screen hidden">
-      <div class="result-container" id="result-capture-area">
-        <div class="receipt-header">
-          <h3>나의 사회적 가면 진단서</h3>
-          <p class="date" id="today-date"></p>
-        </div>
-        
-        <div class="result-title-box">
-          <p class="mbti-type" id="result-mbti">MBTI</p>
-          <h1 id="result-title" class="result-title">가면 페르소나 타이틀</h1>
-        </div>
-
-        <div class="translation-box">
-          <div class="mask-section">
-            <span class="label">사회용 멘트 (가면)</span>
-            <p id="result-mask" class="mask-text">"대박! 너무 멋져요!"</p>
+    <!-- Main App Container -->
+    <div id="app">
+      <!-- Intro Section -->
+      <section id="intro" class="screen active">
+        <div class="intro-container">
+          <h2 class="subtitle">당신의 영혼은 안전하십니까?</h2>
+          <h1 class="title">사회적 가면 &<br>속마음 번역기</h1>
+          <div class="image-wrapper">
+            <div class="glass-orb"></div>
           </div>
-          <div class="divider"></div>
-          <div class="inner-section">
-            <span class="label">찐 속마음 (본심)</span>
-            <p id="result-inner" class="inner-text">(언제 끝나냐 집 가고 싶다)</p>
+          <p class="description">사회생활, 인간관계, 직장에 지친<br>현대인 생존 테스트</p>
+          <button id="start-btn" class="primary-btn pulse-anim">나의 가면 테스트 시작하기</button>
+        </div>
+      </section>
+
+      <!-- Quiz Section -->
+      <section id="quiz" class="screen hidden">
+        <div class="quiz-container">
+          <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar"></div>
+          </div>
+          <div class="question-counter">
+            <span id="current-q">1</span> / 12
+          </div>
+          <h2 id="question-text" class="question">질문 텍스트가 여기에 들어갑니다.</h2>
+          <div class="options">
+            <button class="option-btn" id="option-a">선택지 A</button>
+            <button class="option-btn" id="option-b">선택지 B</button>
           </div>
         </div>
+      </section>
 
-        <div class="chemistry-box">
-          <div class="chem-item good">
-            <span class="chem-label">찰떡 궁합</span>
-            <span id="chem-good" class="chem-type">INFJ</span>
+      <!-- Result Section -->
+      <section id="result" class="screen hidden">
+        <div class="result-container" id="result-capture-area">
+          
+          <div class="mobile-ad-banner top-ad">
+            <div class="ad-placeholder horizontal">[모바일 쿠팡 파트너스 광고 자리]</div>
           </div>
-          <div class="chem-item bad">
-            <span class="chem-label">파멸의 조합</span>
-            <span id="chem-bad" class="chem-type">ISTJ</span>
+
+          <div class="receipt-header">
+            <h3>나의 사회적 가면 진단서</h3>
+            <p class="date" id="today-date"></p>
           </div>
+          
+          <!-- Dual MBTI Layout -->
+          <div class="dual-mbti-box">
+            <div class="mbti-col">
+              <span class="mbti-label">사회용 가면</span>
+              <p class="mbti-type mask-type" id="result-mbti-mask">MBTI</p>
+            </div>
+            <div class="mbti-col">
+              <span class="mbti-label">진짜 본성</span>
+              <p class="mbti-type real-type" id="result-mbti-real">MBTI</p>
+            </div>
+          </div>
+
+          <div class="accuracy-gauge-container">
+            <div class="gauge-label">
+              <span>가면-본성 일치도</span>
+              <span id="accuracy-percent">0%</span>
+            </div>
+            <div class="gauge-bg">
+              <div class="gauge-fill" id="gauge-fill"></div>
+            </div>
+          </div>
+
+          <div class="result-title-box">
+            <h1 id="result-title" class="result-title">가면 페르소나 타이틀</h1>
+          </div>
+
+          <div class="translation-box">
+            <div class="mask-section">
+              <span class="label">사회용 멘트 (가면)</span>
+              <p id="result-mask" class="mask-text">"대박! 너무 멋져요!"</p>
+            </div>
+            <div class="divider"></div>
+            <div class="inner-section">
+              <span class="label">찐 속마음 (본심)</span>
+              <p id="result-inner" class="inner-text">(언제 끝나냐 집 가고 싶다)</p>
+            </div>
+          </div>
+
+          <div class="reading-box">
+            <div class="reading-item">
+              <span class="reading-label">🤔 가면을 쓰는 이유</span>
+              <p id="result-reason" class="reading-text">이유 텍스트</p>
+            </div>
+            <div class="reading-item">
+              <span class="reading-label">💌 당신을 위한 처방전</span>
+              <p id="result-advice" class="reading-text">조언 텍스트</p>
+            </div>
+            <div class="reading-item">
+              <span class="reading-label">🗡 남들은 모르는 나의 진짜 무기</span>
+              <p id="result-secret-weapon" class="reading-text">무기 텍스트</p>
+            </div>
+          </div>
+
+          <div class="chemistry-box">
+            <div class="chem-item good">
+              <span class="chem-label">찰떡 궁합</span>
+              <span id="chem-good" class="chem-type">INFJ</span>
+              <div class="chem-desc-wrapper">
+                <p id="chem-good-desc" class="chem-desc collapsed">찰떡 설명</p>
+                <button class="toggle-desc-btn" onclick="toggleDesc(this)">자세히 보기 ▼</button>
+              </div>
+            </div>
+            <div class="chem-item bad">
+              <span class="chem-label">도전 과제 궁합</span>
+              <span id="chem-bad" class="chem-type">ISTJ</span>
+              <div class="chem-desc-wrapper">
+                <p id="chem-bad-desc" class="chem-desc collapsed">파멸 설명</p>
+                <button class="toggle-desc-btn" onclick="toggleDesc(this)">자세히 보기 ▼</button>
+              </div>
+            </div>
+          </div>
+          <div class="one-liner-box">
+            <span class="one-liner-label">당신에게 보내는 한 문장</span>
+            <p id="result-one-liner" class="one-liner-text">한 문장 텍스트</p>
+          </div>
+          
+          <div class="mobile-ad-banner bottom-ad">
+            <div class="ad-placeholder horizontal">[모바일 쿠팡 파트너스 광고 자리]</div>
+          </div>
+
         </div>
-      </div>
 
-      <div class="action-buttons">
-        <button id="copy-link-btn" class="secondary-btn">🔗 링크 복사하기</button>
-        <button id="retry-btn" class="tertiary-btn">🔄 다시 하기</button>
-      </div>
-    </section>
+        <div class="action-buttons">
+          <button id="copy-link-btn" class="secondary-btn">🔗 링크 복사하기</button>
+          <button id="retry-btn" class="tertiary-btn">🔄 다시 하기</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right Ad Sidebar -->
+    <aside class="ad-sidebar right-sidebar">
+      <div class="ad-placeholder vertical">[쿠팡 파트너스 배너 자리]</div>
+    </aside>
   </div>
 
   <!-- Scripts -->
