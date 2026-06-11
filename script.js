@@ -8,6 +8,7 @@ const optionA = document.getElementById('option-a');
 const optionB = document.getElementById('option-b');
 const retryBtn = document.getElementById('retry-btn');
 const copyLinkBtn = document.getElementById('copy-link-btn');
+const saveImgBtn = document.getElementById('save-img-btn');
 
 const progressBar = document.getElementById('progress-bar');
 const currentQSpan = document.getElementById('current-q');
@@ -46,6 +47,7 @@ function init() {
   optionB.addEventListener('click', () => handleOptionClick(1));
   retryBtn.addEventListener('click', resetQuiz);
   copyLinkBtn.addEventListener('click', shareLink);
+  saveImgBtn.addEventListener('click', saveDiagnosisAsImage);
 }
 
 // Start Quiz
@@ -145,10 +147,6 @@ function showResult() {
   chemBad.innerText = result.bad;
   chemBadDesc.innerText = result.badDesc;
   
-  // Reset toggles
-  document.querySelectorAll('.chem-desc').forEach(el => el.classList.add('collapsed'));
-  document.querySelectorAll('.toggle-desc-btn').forEach(btn => btn.innerText = "자세히 보기 ▼");
-
   // Switch Screens
   quizScreen.classList.remove('active');
   quizScreen.classList.add('hidden');
@@ -164,6 +162,31 @@ function showResult() {
   }, 300);
 }
 
+function resetAllScrollPositions() {
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+
+  const scrollTargets = [
+    document.querySelector('.app'),
+    document.querySelector('.container'),
+    document.querySelector('.main-container'),
+    document.querySelector('.result-container'),
+    document.querySelector('.result-card'),
+    document.querySelector('.test-container'),
+    document.querySelector('#app'),
+    document.querySelector('#result'),
+    document.querySelector('#start-screen')
+  ];
+
+  scrollTargets.forEach((el) => {
+    if (el) {
+      el.scrollTop = 0;
+      el.scrollLeft = 0;
+    }
+  });
+}
+
 // Reset Quiz
 function resetQuiz() {
   currentQuestionIndex = 0;
@@ -174,22 +197,21 @@ function resetQuiz() {
   resultScreen.classList.remove('active');
   resultScreen.classList.add('hidden');
   
+  resetAllScrollPositions();
+  
   setTimeout(() => {
     introScreen.classList.remove('hidden');
     introScreen.classList.add('active');
+    
+    // DOM 렌더링 직후 스크롤 보장
+    setTimeout(() => {
+      resetAllScrollPositions();
+    }, 0);
+    
+    setTimeout(() => {
+      resetAllScrollPositions();
+    }, 100);
   }, 300);
-}
-
-// Toggle Description
-function toggleDesc(btn) {
-  const descElement = btn.previousElementSibling;
-  if (descElement.classList.contains('collapsed')) {
-    descElement.classList.remove('collapsed');
-    btn.innerText = "접어두기 ▲";
-  } else {
-    descElement.classList.add('collapsed');
-    btn.innerText = "자세히 보기 ▼";
-  }
 }
 
 // Share Link
@@ -210,8 +232,42 @@ function shareLink() {
   }
 }
 
-// Ensure toggleDesc is globally available
-window.toggleDesc = toggleDesc;
+// Save Diagnosis as Image
+function saveDiagnosisAsImage() {
+  const originalText = saveImgBtn.innerText;
+  saveImgBtn.innerText = "⏳ 저장 중...";
+  saveImgBtn.disabled = true;
+
+  const resultContainer = document.querySelector('.result-container');
+  const adBanner = document.querySelector('.mobile-ad-banner.bottom-ad');
+  
+  // 광고 잠시 숨기기
+  if (adBanner) adBanner.style.display = 'none';
+
+  // html2canvas 옵션: 스케일 높여서 화질 개선
+  html2canvas(resultContainer, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#ffffff'
+  }).then(canvas => {
+    // 숨겼던 광고 다시 표시
+    if (adBanner) adBanner.style.display = '';
+
+    const link = document.createElement('a');
+    link.download = '나의-사회적-가면-진단서.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+
+    saveImgBtn.innerText = originalText;
+    saveImgBtn.disabled = false;
+  }).catch(err => {
+    console.error('Image save error:', err);
+    if (adBanner) adBanner.style.display = '';
+    saveImgBtn.innerText = originalText;
+    saveImgBtn.disabled = false;
+    alert("이미지 저장에 실패했습니다.");
+  });
+}
 
 // Start
 window.addEventListener('DOMContentLoaded', init);

@@ -16,6 +16,9 @@
   
   <!-- Styles -->
   <link rel="stylesheet" href="style.css">
+  
+  <!-- html2canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
   <!-- PC Sidebars Wrapper -->
@@ -128,16 +131,14 @@
               <span class="chem-label">찰떡 궁합</span>
               <span id="chem-good" class="chem-type">INFJ</span>
               <div class="chem-desc-wrapper">
-                <p id="chem-good-desc" class="chem-desc collapsed">찰떡 설명</p>
-                <button class="toggle-desc-btn" onclick="toggleDesc(this)">자세히 보기 ▼</button>
+                <p id="chem-good-desc" class="chem-desc">찰떡 설명</p>
               </div>
             </div>
             <div class="chem-item bad">
               <span class="chem-label">도전 과제 궁합</span>
               <span id="chem-bad" class="chem-type">ISTJ</span>
               <div class="chem-desc-wrapper">
-                <p id="chem-bad-desc" class="chem-desc collapsed">파멸 설명</p>
-                <button class="toggle-desc-btn" onclick="toggleDesc(this)">자세히 보기 ▼</button>
+                <p id="chem-bad-desc" class="chem-desc">파멸 설명</p>
               </div>
             </div>
           </div>
@@ -153,6 +154,7 @@
         </div>
 
         <div class="action-buttons">
+          <button id="save-img-btn" class="secondary-btn">🧾 진단서 전체 저장하기</button>
           <button id="copy-link-btn" class="secondary-btn">🔗 링크 복사하기</button>
           <button id="retry-btn" class="tertiary-btn">🔄 다시 하기</button>
         </div>
