@@ -10,6 +10,10 @@ const retryBtn = document.getElementById('retry-btn');
 const copyLinkBtn = document.getElementById('copy-link-btn');
 const saveImgBtn = document.getElementById('save-img-btn');
 
+const userNameInput = document.getElementById('user-name');
+const userEmailInput = document.getElementById('user-email');
+const signupError = document.getElementById('signup-error');
+
 const progressBar = document.getElementById('progress-bar');
 const currentQSpan = document.getElementById('current-q');
 const questionText = document.getElementById('question-text');
@@ -36,6 +40,8 @@ const chemBadDesc = document.getElementById('chem-bad-desc');
 let currentQuestionIndex = 0;
 let maskScores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
 let realScores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
+let globalUserName = "";
+let globalUserEmail = "";
 
 // Initialization
 function init() {
@@ -52,6 +58,24 @@ function init() {
 
 // Start Quiz
 function startQuiz() {
+  const nameVal = userNameInput.value.trim();
+  const emailVal = userEmailInput.value.trim();
+  
+  if (!nameVal || !emailVal) {
+    signupError.innerText = "이름과 이메일을 모두 입력해주세요.";
+    return;
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(emailVal)) {
+    signupError.innerText = "유효한 이메일 주소를 입력해주세요.";
+    return;
+  }
+  
+  signupError.innerText = "";
+  globalUserName = nameVal;
+  globalUserEmail = emailVal;
+
   introScreen.classList.remove('active');
   introScreen.classList.add('hidden');
   
@@ -146,6 +170,9 @@ function showResult() {
   chemGoodDesc.innerText = result.goodDesc;
   chemBad.innerText = result.bad;
   chemBadDesc.innerText = result.badDesc;
+  
+  // 구글 시트로 데이터 전송 (비동기)
+  sendDataToGoogleSheet(maskMbti, realMbti, percentage, result.title, globalUserName, globalUserEmail);
   
   // Switch Screens
   quizScreen.classList.remove('active');
@@ -266,6 +293,32 @@ function saveDiagnosisAsImage() {
     saveImgBtn.innerText = originalText;
     saveImgBtn.disabled = false;
     alert("이미지 저장에 실패했습니다.");
+  });
+}
+
+// 구글 시트로 데이터 전송
+function sendDataToGoogleSheet(maskMbti, realMbti, percentage, title, name, email) {
+  // TODO: 발급받은 구글 앱스 스크립트 웹앱 URL을 아래에 붙여넣으세요.
+  const SCRIPT_URL = "여기에_구글_앱스_스크립트_웹앱_URL을_넣으세요";
+  
+  if (SCRIPT_URL.includes("여기에")) return;
+  
+  const formData = new FormData();
+  formData.append('name', name);
+  formData.append('email', email);
+  formData.append('maskMbti', maskMbti);
+  formData.append('realMbti', realMbti);
+  formData.append('percentage', percentage);
+  formData.append('title', title);
+  
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: formData,
+    mode: 'no-cors'
+  }).then(() => {
+    console.log("Data successfully sent to Google Sheet");
+  }).catch(err => {
+    console.error("Error sending data to Google Sheet:", err);
   });
 }
 
