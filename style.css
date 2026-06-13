@@ -257,40 +257,6 @@ button:active {
   word-break: keep-all;
 }
 
-/* Signup Form */
-.signup-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.signup-input {
-  width: 100%;
-  padding: 16px 20px;
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  font-family: var(--font-family);
-  font-size: 15px;
-  background: rgba(255, 255, 255, 0.8);
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.signup-input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(161, 140, 209, 0.2);
-}
-
-.error-msg {
-  color: #e74c3c;
-  font-size: 13px;
-  text-align: center;
-  margin-top: -4px;
-  min-height: 18px;
-}
-
 /* Quiz Section */
 .quiz-container {
   flex: 1;

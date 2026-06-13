@@ -10,10 +10,6 @@ const retryBtn = document.getElementById('retry-btn');
 const copyLinkBtn = document.getElementById('copy-link-btn');
 const saveImgBtn = document.getElementById('save-img-btn');
 
-const userNameInput = document.getElementById('user-name');
-const userEmailInput = document.getElementById('user-email');
-const signupError = document.getElementById('signup-error');
-
 const progressBar = document.getElementById('progress-bar');
 const currentQSpan = document.getElementById('current-q');
 const questionText = document.getElementById('question-text');
@@ -40,8 +36,6 @@ const chemBadDesc = document.getElementById('chem-bad-desc');
 let currentQuestionIndex = 0;
 let maskScores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
 let realScores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
-let globalUserName = "";
-let globalUserEmail = "";
 
 // Initialization
 function init() {
@@ -54,27 +48,13 @@ function init() {
   retryBtn.addEventListener('click', resetQuiz);
   copyLinkBtn.addEventListener('click', shareLink);
   saveImgBtn.addEventListener('click', saveDiagnosisAsImage);
+
+  Analytics.track('visit');
 }
 
 // Start Quiz
 function startQuiz() {
-  const nameVal = userNameInput.value.trim();
-  const emailVal = userEmailInput.value.trim();
-  
-  if (!nameVal || !emailVal) {
-    signupError.innerText = "이름과 이메일을 모두 입력해주세요.";
-    return;
-  }
-  
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(emailVal)) {
-    signupError.innerText = "유효한 이메일 주소를 입력해주세요.";
-    return;
-  }
-  
-  signupError.innerText = "";
-  globalUserName = nameVal;
-  globalUserEmail = emailVal;
+  Analytics.track('start_test');
 
   introScreen.classList.remove('active');
   introScreen.classList.add('hidden');
@@ -105,6 +85,8 @@ function handleOptionClick(optionIndex) {
   maskScores[selectedOption.mask] += (selectedOption.maskWeight || 1);
   realScores[selectedOption.real] += (selectedOption.realWeight || 1);
   
+  Analytics.track('answer_question', { questionNumber: currentQuestionIndex + 1 });
+  
   if (currentQuestionIndex < quizData.length - 1) {
     currentQuestionIndex++;
     const optionsDiv = document.querySelector('.options');
@@ -114,6 +96,7 @@ function handleOptionClick(optionIndex) {
       optionsDiv.style.opacity = 1;
     }, 200);
   } else {
+    Analytics.track('complete_test');
     showResult();
   }
 }
@@ -171,8 +154,15 @@ function showResult() {
   chemBad.innerText = result.bad;
   chemBadDesc.innerText = result.badDesc;
   
-  // 구글 시트로 데이터 전송 (비동기)
-  sendDataToGoogleSheet(maskMbti, realMbti, percentage, result.title, globalUserName, globalUserEmail);
+  // 구글 시트로 데이터 전송 (기존 방식 대신 Analytics 활용)
+  Analytics.track('result_generated', {
+    maskMbti: maskMbti,
+    coreMbti: realMbti,
+    mbtiCombination: result.title
+  });
+  
+  // 기존 결과 저장 기능 완벽 유지
+  sendDataToGoogleSheet(maskMbti, realMbti, percentage, result.title);
   
   // Switch Screens
   quizScreen.classList.remove('active');
@@ -216,6 +206,7 @@ function resetAllScrollPositions() {
 
 // Reset Quiz
 function resetQuiz() {
+  Analytics.track('retry_test');
   currentQuestionIndex = 0;
   maskScores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
   realScores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
@@ -249,9 +240,12 @@ function shareLink() {
       title: '나의 사회적 가면 & 속마음 번역기',
       text: '가면과 본성을 동시에 분석하는 심리테스트!',
       url: url
+    }).then(() => {
+      Analytics.track('share_result', { shareType: 'navigator_share' });
     }).catch(console.error);
   } else {
     navigator.clipboard.writeText(url).then(() => {
+      Analytics.track('share_result', { shareType: 'clipboard' });
       alert("링크가 복사되었습니다. 친구들에게 공유해보세요!");
     }).catch(err => {
       alert("링크 복사에 실패했습니다.");
@@ -285,6 +279,8 @@ function saveDiagnosisAsImage() {
     link.href = canvas.toDataURL('image/png');
     link.click();
 
+    Analytics.track('pdf_download');
+
     saveImgBtn.innerText = originalText;
     saveImgBtn.disabled = false;
   }).catch(err => {
@@ -296,16 +292,13 @@ function saveDiagnosisAsImage() {
   });
 }
 
-// 구글 시트로 데이터 전송
-function sendDataToGoogleSheet(maskMbti, realMbti, percentage, title, name, email) {
-  // TODO: 발급받은 구글 앱스 스크립트 웹앱 URL을 아래에 붙여넣으세요.
-  const SCRIPT_URL = "여기에_구글_앱스_스크립트_웹앱_URL을_넣으세요";
+// 구글 시트로 데이터 전송 (기존 기능)
+function sendDataToGoogleSheet(maskMbti, realMbti, percentage, title) {
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycrArURTSPezLuutSzNBAmoDicYSGonYx-shxdZruvJGfqKNNCCmrJ6Cu2BHPtaQJnZg/exec";
   
-  if (SCRIPT_URL.includes("여기에")) return;
+  if (!SCRIPT_URL || SCRIPT_URL.includes("여기에")) return;
   
   const formData = new FormData();
-  formData.append('name', name);
-  formData.append('email', email);
   formData.append('maskMbti', maskMbti);
   formData.append('realMbti', realMbti);
   formData.append('percentage', percentage);
@@ -315,12 +308,44 @@ function sendDataToGoogleSheet(maskMbti, realMbti, percentage, title, name, emai
     method: 'POST',
     body: formData,
     mode: 'no-cors'
-  }).then(() => {
-    console.log("Data successfully sent to Google Sheet");
-  }).catch(err => {
-    console.error("Error sending data to Google Sheet:", err);
-  });
+  }).catch(err => console.error("Error:", err));
 }
 
-// Start
-window.addEventListener('DOMContentLoaded', init);
+// Start & Global Listeners
+window.addEventListener('DOMContentLoaded', () => {
+  init();
+
+  // Exit Question Tracking (창 닫기/새로고침 시)
+  window.addEventListener('beforeunload', () => {
+    // 퀴즈 화면이 활성화되어 있고 마지막 문제가 아니라면 이탈로 간주
+    if (quizScreen.classList.contains('active') && currentQuestionIndex < 12) {
+      Analytics.track('exit_question', { questionNumber: currentQuestionIndex + 1 });
+    }
+  });
+
+  // Ad Impression & Click Tracking
+  const ads = document.querySelectorAll('.mobile-ad-banner, .pc-ad-banner');
+  if (ads.length > 0 && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          Analytics.track('ad_impression', { 
+            adPosition: entry.target.classList.contains('bottom-ad') ? 'bottom' : 'sidebar',
+            adName: 'coupang_partner'
+          });
+          observer.unobserve(entry.target); // 한 번 노출되면 더 이상 추적하지 않음
+        }
+      });
+    }, { threshold: 0.5 }); // 50% 이상 보일 때
+
+    ads.forEach(ad => {
+      observer.observe(ad);
+      ad.addEventListener('click', () => {
+        Analytics.track('ad_click', {
+          adPosition: ad.classList.contains('bottom-ad') ? 'bottom' : 'sidebar',
+          adName: 'coupang_partner'
+        });
+      });
+    });
+  }
+});
