@@ -8,6 +8,7 @@ const optionA = document.getElementById('option-a');
 const optionB = document.getElementById('option-b');
 const retryBtn = document.getElementById('retry-btn');
 const copyLinkBtn = document.getElementById('copy-link-btn');
+const shareResultBtn = document.getElementById('share-result-btn');
 const saveImgBtn = document.getElementById('save-img-btn');
 
 const progressBar = document.getElementById('progress-bar');
@@ -32,6 +33,38 @@ const chemGoodDesc = document.getElementById('chem-good-desc');
 const chemBad = document.getElementById('chem-bad');
 const chemBadDesc = document.getElementById('chem-bad-desc');
 
+// Recommended Products Data (카테고리형 쿠팡 파트너스 구조)
+const recommendedProducts = [
+  {
+    title: "감정 정리 아이템",
+    reason: "복잡한 생각을 차분히 정리하는 데 도움이 될 수 있어요.",
+    image: "https://via.placeholder.com/300x225?text=Notebook",
+    link: "https://www.coupang.com/",
+    buttonText: "관련 상품 보기"
+  },
+  {
+    title: "집중력 향상 아이템",
+    reason: "혼자 몰입하는 시간을 더 편안하게 만들어줘요.",
+    image: "https://via.placeholder.com/300x225?text=Focus",
+    link: "https://www.coupang.com/",
+    buttonText: "관련 상품 보기"
+  },
+  {
+    title: "수면 회복 아이템",
+    reason: "생각이 많은 밤에 휴식을 도와줄 수 있어요.",
+    image: "https://via.placeholder.com/300x225?text=Sleep",
+    link: "https://www.coupang.com/",
+    buttonText: "관련 상품 보기"
+  },
+  {
+    title: "스트레스 완화 아이템",
+    reason: "지친 마음과 몸을 부드럽게 풀어주는 데 좋아요.",
+    image: "https://via.placeholder.com/300x225?text=Relax",
+    link: "https://www.coupang.com/",
+    buttonText: "관련 상품 보기"
+  }
+];
+
 // State Variables
 let currentQuestionIndex = 0;
 let maskScores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
@@ -42,14 +75,18 @@ function init() {
   const today = new Date();
   todayDate.innerText = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')} 발행`;
 
+  if (!localStorage.getItem('vibe_has_visited')) {
+    Analytics.track('visit');
+    localStorage.setItem('vibe_has_visited', 'true');
+  }
+
   startBtn.addEventListener('click', startQuiz);
   optionA.addEventListener('click', () => handleOptionClick(0));
   optionB.addEventListener('click', () => handleOptionClick(1));
   retryBtn.addEventListener('click', resetQuiz);
   copyLinkBtn.addEventListener('click', shareLink);
+  shareResultBtn.addEventListener('click', shareResultDetailed);
   saveImgBtn.addEventListener('click', saveDiagnosisAsImage);
-
-  Analytics.track('visit');
 }
 
 // Start Quiz
@@ -85,8 +122,6 @@ function handleOptionClick(optionIndex) {
   maskScores[selectedOption.mask] += (selectedOption.maskWeight || 1);
   realScores[selectedOption.real] += (selectedOption.realWeight || 1);
   
-  Analytics.track('answer_question', { questionNumber: currentQuestionIndex + 1 });
-  
   if (currentQuestionIndex < quizData.length - 1) {
     currentQuestionIndex++;
     const optionsDiv = document.querySelector('.options');
@@ -96,13 +131,14 @@ function handleOptionClick(optionIndex) {
       optionsDiv.style.opacity = 1;
     }, 200);
   } else {
-    Analytics.track('complete_test');
     showResult();
   }
 }
 
 // Calculate MBTI and Show Result
 function showResult() {
+  Analytics.track('complete_test');
+  
   // Mask MBTI
   let maskMbti = "";
   maskMbti += (maskScores.E >= maskScores.I) ? "E" : "I";
@@ -163,6 +199,9 @@ function showResult() {
   
   // 기존 결과 저장 기능 완벽 유지
   sendDataToGoogleSheet(maskMbti, realMbti, percentage, result.title);
+  
+  // 추천 상품 렌더링
+  renderRecommendedProducts();
   
   // Switch Screens
   quizScreen.classList.remove('active');
@@ -232,23 +271,45 @@ function resetQuiz() {
   }, 300);
 }
 
-// Share Link
+// Share Link (Copy URL only)
 function shareLink() {
   const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    Analytics.track('share_result', { shareType: 'clipboard_link_only' });
+    alert("링크가 복사되었습니다. 친구들에게 공유해보세요!");
+  }).catch(err => {
+    alert("링크 복사에 실패했습니다.");
+  });
+}
+
+// Share Result Detailed
+function shareResultDetailed() {
+  const url = window.location.href;
+  
+  const mask = resultMbtiMask.innerText || "알 수 없음";
+  const real = resultMbtiReal.innerText || "알 수 없음";
+  const acc = accuracyPercent.innerText || "0%";
+  const title = resultTitle.innerText || "알 수 없음";
+  const oneLinerEl = document.getElementById('result-one-liner');
+  const oneLiner = oneLinerEl ? oneLinerEl.innerText : "당신만의 특별한 매력이 있습니다.";
+  
+  const shareText = `나의 사회적 가면 진단서 결과\n\n사회용 가면: ${mask}\n진짜 본성: ${real}\n가면-본성 일치도: ${acc}\n\n결과: ${title}\n\n'${oneLiner}'\n\n너도 해보기 👇`;
+
   if (navigator.share) {
     navigator.share({
-      title: '나의 사회적 가면 & 속마음 번역기',
-      text: '가면과 본성을 동시에 분석하는 심리테스트!',
+      title: '나의 사회적 가면 진단서',
+      text: shareText,
       url: url
     }).then(() => {
-      Analytics.track('share_result', { shareType: 'navigator_share' });
+      Analytics.track('share_result', { shareType: 'navigator_share_detailed' });
     }).catch(console.error);
   } else {
-    navigator.clipboard.writeText(url).then(() => {
-      Analytics.track('share_result', { shareType: 'clipboard' });
-      alert("링크가 복사되었습니다. 친구들에게 공유해보세요!");
+    const fallbackText = shareText + "\n" + url;
+    navigator.clipboard.writeText(fallbackText).then(() => {
+      Analytics.track('share_result', { shareType: 'clipboard_detailed' });
+      alert("진단서 결과가 복사되었습니다. 친구들에게 공유해보세요!");
     }).catch(err => {
-      alert("링크 복사에 실패했습니다.");
+      alert("결과 복사에 실패했습니다.");
     });
   }
 }
@@ -311,35 +372,60 @@ function sendDataToGoogleSheet(maskMbti, realMbti, percentage, title) {
   }).catch(err => console.error("Error:", err));
 }
 
+// Render Recommended Products
+function renderRecommendedProducts() {
+  const grid = document.getElementById('recommended-grid');
+  if (!grid) return;
+  
+  grid.innerHTML = '';
+  recommendedProducts.forEach(item => {
+    const card = document.createElement('a');
+    card.className = 'product-card';
+    card.href = item.link;
+    card.target = '_blank';
+    card.rel = 'noopener noreferrer';
+    
+    card.innerHTML = `
+      <img src="${item.image}" alt="${item.title}" class="product-img">
+      <h4 class="product-title">${item.title}</h4>
+      <p class="product-reason">${item.reason}</p>
+      <button class="product-btn">${item.buttonText}</button>
+    `;
+    
+    // Ad Click tracking
+    card.addEventListener('click', () => {
+      Analytics.track('ad_click', {
+        adPosition: 'recommended_products',
+        adName: item.title
+      });
+    });
+    
+    grid.appendChild(card);
+  });
+}
+
 // Start & Global Listeners
 window.addEventListener('DOMContentLoaded', () => {
   init();
 
-  // Exit Question Tracking (창 닫기/새로고침 시)
-  window.addEventListener('beforeunload', () => {
-    // 퀴즈 화면이 활성화되어 있고 마지막 문제가 아니라면 이탈로 간주
-    if (quizScreen.classList.contains('active') && currentQuestionIndex < 12) {
-      Analytics.track('exit_question', { questionNumber: currentQuestionIndex + 1 });
+  // Exit tracking logic
+  let lastExitRecorded = -1;
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      const quizSection = document.getElementById('quiz');
+      if (quizSection && quizSection.classList.contains('active')) {
+        if (lastExitRecorded !== currentQuestionIndex) {
+          Analytics.track('exit_question', { questionNumber: currentQuestionIndex + 1 });
+          lastExitRecorded = currentQuestionIndex;
+        }
+      }
     }
   });
 
-  // Ad Impression & Click Tracking
+  // Ad Click Tracking
   const ads = document.querySelectorAll('.mobile-ad-banner, .pc-ad-banner');
-  if (ads.length > 0 && 'IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          Analytics.track('ad_impression', { 
-            adPosition: entry.target.classList.contains('bottom-ad') ? 'bottom' : 'sidebar',
-            adName: 'coupang_partner'
-          });
-          observer.unobserve(entry.target); // 한 번 노출되면 더 이상 추적하지 않음
-        }
-      });
-    }, { threshold: 0.5 }); // 50% 이상 보일 때
-
+  if (ads.length > 0) {
     ads.forEach(ad => {
-      observer.observe(ad);
       ad.addEventListener('click', () => {
         Analytics.track('ad_click', {
           adPosition: ad.classList.contains('bottom-ad') ? 'bottom' : 'sidebar',

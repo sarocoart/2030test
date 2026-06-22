@@ -150,17 +150,29 @@
             <span class="one-liner-label">당신에게 보내는 한 문장</span>
             <p id="result-one-liner" class="one-liner-text">한 문장 텍스트</p>
           </div>
-          
-          <div class="mobile-ad-banner bottom-ad">
-            <div class="ad-placeholder horizontal">[모바일 쿠팡 파트너스 광고 자리]</div>
-          </div>
-
         </div>
 
         <div class="action-buttons">
           <button id="save-img-btn" class="secondary-btn">🧾 진단서 전체 저장하기</button>
-          <button id="copy-link-btn" class="secondary-btn">🔗 링크 복사하기</button>
+          <div class="share-buttons-row">
+            <button id="copy-link-btn" class="secondary-btn">🔗 링크 복사</button>
+            <button id="share-result-btn" class="secondary-btn">💌 진단서 결과 공유</button>
+          </div>
           <button id="retry-btn" class="tertiary-btn">🔄 다시 하기</button>
+        </div>
+
+        <!-- Recommended Products Section -->
+        <div id="recommended-products-section" class="recommended-products">
+          <h3 class="recommended-title">✨ 당신을 위한 추천 아이템</h3>
+          <div class="recommended-highlight">💜 당신과 비슷한 성향의 사람들이 가장 많이 선택한 아이템입니다.</div>
+          <p class="recommended-subtitle">사회적 가면과 속마음 분석 결과를 바탕으로 도움이 될 만한 제품을 골라봤어요.</p>
+          <div class="recommended-grid" id="recommended-grid">
+            <!-- Items injected by JS -->
+          </div>
+        </div>
+
+        <div class="mobile-ad-banner bottom-ad">
+          <div class="ad-placeholder horizontal">[모바일 쿠팡 파트너스 광고 자리]</div>
         </div>
       </section>
     </div>
