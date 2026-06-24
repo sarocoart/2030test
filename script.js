@@ -425,7 +425,10 @@ async function renderRecommendedProducts() {
   }
 
   grid.innerHTML = '';
-  recommendedProducts.forEach(item => {
+  // 10. RecommendedProductsSection should render 4 cards
+  const adsToRender = recommendedProducts.slice(0, 4);
+  
+  adsToRender.forEach(item => {
     const card = document.createElement('a');
     card.className = 'product-card';
     card.href = item.targetUrl;

@@ -8,5 +8,5 @@ window.ENV = {
   
   // Google Sheets Webhook URL for fetching Ads
   // We reuse the existing analytics URL since it's the same Google Apps Script project
-  GOOGLE_SHEETS_AD_URL: "https://script.google.com/macros/s/AKfycbwe1mDYx2wwnHJFyTWBYwdqac7_j1Il6uf3WVGYQY4yLUICAOq7Xy169yMohvlUlscAUQ/exec"
+  GOOGLE_SHEETS_AD_URL: "https://script.google.com/macros/s/AKfycbyUzW2UHn6LtnG10Uyt39HcH1yZrY5NvdoRfPsSCXQddye8Nbs3ry-8xMcKqpK3QPdMRQ/exec"
 };
