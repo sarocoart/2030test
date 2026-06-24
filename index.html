@@ -20,8 +20,10 @@
   <!-- html2canvas -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   
-  <!-- Analytics -->
+  <!-- Analytics & Config & Ads -->
+  <script src="config.js"></script>
   <script src="analytics.js"></script>
+  <script src="adManager.js"></script>
 </head>
 <body>
   <!-- PC Sidebars Wrapper -->
@@ -68,7 +70,7 @@
       <section id="result" class="screen hidden">
         <div class="result-container" id="result-capture-area">
           
-          <div class="mobile-ad-banner top-ad">
+          <div class="mobile-ad-banner top-ad" id="top-ad-container">
             <div class="ad-placeholder horizontal">[모바일 쿠팡 파트너스 광고 자리]</div>
           </div>
 
@@ -171,7 +173,7 @@
           </div>
         </div>
 
-        <div class="mobile-ad-banner bottom-ad">
+        <div class="mobile-ad-banner bottom-ad" id="bottom-ad-container">
           <div class="ad-placeholder horizontal">[모바일 쿠팡 파트너스 광고 자리]</div>
         </div>
       </section>

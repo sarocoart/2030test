@@ -33,37 +33,7 @@ const chemGoodDesc = document.getElementById('chem-good-desc');
 const chemBad = document.getElementById('chem-bad');
 const chemBadDesc = document.getElementById('chem-bad-desc');
 
-// Recommended Products Data (카테고리형 쿠팡 파트너스 구조)
-const recommendedProducts = [
-  {
-    title: "감정 정리 아이템",
-    reason: "복잡한 생각을 차분히 정리하는 데 도움이 될 수 있어요.",
-    image: "https://via.placeholder.com/300x225?text=Notebook",
-    link: "https://www.coupang.com/",
-    buttonText: "관련 상품 보기"
-  },
-  {
-    title: "집중력 향상 아이템",
-    reason: "혼자 몰입하는 시간을 더 편안하게 만들어줘요.",
-    image: "https://via.placeholder.com/300x225?text=Focus",
-    link: "https://www.coupang.com/",
-    buttonText: "관련 상품 보기"
-  },
-  {
-    title: "수면 회복 아이템",
-    reason: "생각이 많은 밤에 휴식을 도와줄 수 있어요.",
-    image: "https://via.placeholder.com/300x225?text=Sleep",
-    link: "https://www.coupang.com/",
-    buttonText: "관련 상품 보기"
-  },
-  {
-    title: "스트레스 완화 아이템",
-    reason: "지친 마음과 몸을 부드럽게 풀어주는 데 좋아요.",
-    image: "https://via.placeholder.com/300x225?text=Relax",
-    link: "https://www.coupang.com/",
-    buttonText: "관련 상품 보기"
-  }
-];
+// Removed static recommendedProducts data. Now managed by AdManager from Google Sheets.
 
 // State Variables
 let currentQuestionIndex = 0;
@@ -71,7 +41,8 @@ let maskScores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
 let realScores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
 
 // Initialization
-function init() {
+async function init() {
+  await AdManager.init();
   const today = new Date();
   todayDate.innerText = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')} 발행`;
 
@@ -200,7 +171,9 @@ function showResult() {
   // 기존 결과 저장 기능 완벽 유지
   sendDataToGoogleSheet(maskMbti, realMbti, percentage, result.title);
   
-  // 추천 상품 렌더링
+  // 추천 상품 및 배너 렌더링
+  renderTopBanner();
+  renderBottomBanner();
   renderRecommendedProducts();
   
   // Switch Screens
@@ -372,24 +345,98 @@ function sendDataToGoogleSheet(maskMbti, realMbti, percentage, title) {
   }).catch(err => console.error("Error:", err));
 }
 
+// Render Banners & Products
+async function renderTopBanner() {
+  const container = document.getElementById('top-ad-container');
+  if (!container) return;
+
+  if (window.ENV.ENABLE_ADSENSE) {
+    // Inject AdSense Top Banner code here
+    container.innerHTML = `
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="${window.ENV.ADSENSE_CLIENT_ID}"
+           data-ad-slot="TOP_BANNER_SLOT_ID"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    `;
+    return;
+  }
+
+  const ad = await AdManager.getTopBanner();
+  if (ad) {
+    container.innerHTML = `
+      <a href="${ad.targetUrl}" target="_blank" rel="noopener noreferrer" style="display:block; width:100%;">
+        <img src="${ad.imageUrl}" alt="${ad.title}" style="width:100%; border-radius:8px;">
+      </a>
+    `;
+    container.querySelector('a').addEventListener('click', () => {
+      Analytics.track('ad_click', { adPosition: 'top_banner', adName: ad.title });
+    });
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+async function renderBottomBanner() {
+  const container = document.getElementById('bottom-ad-container');
+  if (!container) return;
+
+  if (window.ENV.ENABLE_ADSENSE) {
+    // Inject AdSense Bottom Banner code here
+    container.innerHTML = `
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="${window.ENV.ADSENSE_CLIENT_ID}"
+           data-ad-slot="BOTTOM_BANNER_SLOT_ID"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    `;
+    return;
+  }
+
+  const ad = await AdManager.getBottomBanner();
+  if (ad) {
+    container.innerHTML = `
+      <a href="${ad.targetUrl}" target="_blank" rel="noopener noreferrer" style="display:block; width:100%;">
+        <img src="${ad.imageUrl}" alt="${ad.title}" style="width:100%; border-radius:8px;">
+      </a>
+    `;
+    container.querySelector('a').addEventListener('click', () => {
+      Analytics.track('ad_click', { adPosition: 'bottom_banner', adName: ad.title });
+    });
+  } else {
+    container.style.display = 'none';
+  }
+}
+
 // Render Recommended Products
-function renderRecommendedProducts() {
+async function renderRecommendedProducts() {
   const grid = document.getElementById('recommended-grid');
   if (!grid) return;
   
+  const recommendedProducts = await AdManager.getRecommendedAds();
+  
+  if (!recommendedProducts || recommendedProducts.length === 0) {
+    grid.innerHTML = '<p>현재 추천 상품이 없습니다.</p>';
+    return;
+  }
+
   grid.innerHTML = '';
   recommendedProducts.forEach(item => {
     const card = document.createElement('a');
     card.className = 'product-card';
-    card.href = item.link;
+    card.href = item.targetUrl;
     card.target = '_blank';
     card.rel = 'noopener noreferrer';
     
     card.innerHTML = `
-      <img src="${item.image}" alt="${item.title}" class="product-img">
+      <img src="${item.imageUrl}" alt="${item.title}" class="product-img">
       <h4 class="product-title">${item.title}</h4>
-      <p class="product-reason">${item.reason}</p>
-      <button class="product-btn">${item.buttonText}</button>
+      <p class="product-reason">${item.title}</p>
+      <button class="product-btn">관련 상품 보기</button>
     `;
     
     // Ad Click tracking
