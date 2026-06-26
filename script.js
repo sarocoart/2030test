@@ -33,7 +33,7 @@ const chemGoodDesc = document.getElementById('chem-good-desc');
 const chemBad = document.getElementById('chem-bad');
 const chemBadDesc = document.getElementById('chem-bad-desc');
 
-// Removed static recommendedProducts data. Now managed by AdManager from Google Sheets.
+// Removed static recommendedProducts data. Now managed by DataManager from Google Sheets.
 
 // State Variables
 let currentQuestionIndex = 0;
@@ -42,7 +42,7 @@ let realScores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
 
 // Initialization
 async function init() {
-  await AdManager.init();
+  await DataManager.init();
   const today = new Date();
   todayDate.innerText = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')} 발행`;
 
@@ -364,7 +364,7 @@ async function renderTopBanner() {
     return;
   }
 
-  const ad = await AdManager.getTopBanner();
+  const ad = await DataManager.getTopBanner();
   if (ad) {
     container.innerHTML = `
       <a href="${ad.targetUrl}" target="_blank" rel="noopener noreferrer" style="display:block; width:100%;">
@@ -397,7 +397,7 @@ async function renderBottomBanner() {
     return;
   }
 
-  const ad = await AdManager.getBottomBanner();
+  const ad = await DataManager.getBottomBanner();
   if (ad) {
     container.innerHTML = `
       <a href="${ad.targetUrl}" target="_blank" rel="noopener noreferrer" style="display:block; width:100%;">
@@ -417,7 +417,20 @@ async function renderRecommendedProducts() {
   const grid = document.getElementById('recommended-grid');
   if (!grid) return;
   
-  const recommendedProducts = await AdManager.getRecommendedAds();
+  const recommendedProducts = await DataManager.getRecommendedAds();
+  
+  // Feature toggle: Coupang Disclaimer
+  const showDisclaimer = await DataManager.isFeatureEnabled('SHOW_COUPANG_DISCLOSURE');
+  const disclaimerEl = document.getElementById('partners-disclaimer');
+  if (disclaimerEl) {
+    if (showDisclaimer) {
+      const disclaimerText = await DataManager.getConfig('COUPANG_DISCLOSURE_TEXT', '"이 페이지의 일부 추천 링크는 쿠팡 파트너스 활동의 일환으로,<br>이에 따른 일정액의 수수료를 제공받을 수 있습니다."');
+      disclaimerEl.innerHTML = disclaimerText;
+      disclaimerEl.style.display = 'block';
+    } else {
+      disclaimerEl.style.display = 'none';
+    }
+  }
   
   if (!recommendedProducts || recommendedProducts.length === 0) {
     grid.innerHTML = '<p>현재 추천 상품이 없습니다.</p>';

@@ -683,6 +683,15 @@ button:active {
   text-align: center;
 }
 
+.partners-disclaimer {
+  font-size: 11px;
+  color: #999;
+  text-align: center;
+  margin-top: 24px;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
 @media (max-width: 768px) {
   .recommended-products {
     margin-top: 20px;
@@ -705,5 +714,9 @@ button:active {
   .product-btn {
     padding: 8px 0;
     font-size: 12px;
+  }
+  .partners-disclaimer {
+    font-size: 10px;
+    margin-top: 20px;
   }
 }
