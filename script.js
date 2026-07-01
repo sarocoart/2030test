@@ -43,6 +43,17 @@ let realScores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
 // Initialization
 async function init() {
   await DataManager.init();
+  
+  // Platform Name Toggle
+  const platformName = await DataManager.getConfig('platform_name');
+  if (platformName) {
+    document.title = platformName;
+    const titleEl = document.querySelector('.intro-container .title');
+    if (titleEl) {
+      titleEl.innerHTML = platformName;
+    }
+  }
+
   const today = new Date();
   todayDate.innerText = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')} 발행`;
 
@@ -170,6 +181,14 @@ function showResult() {
   
   // 기존 결과 저장 기능 완벽 유지
   sendDataToGoogleSheet(maskMbti, realMbti, percentage, result.title);
+  
+  // Feature Toggles for Result Screen Buttons
+  const showPdf = await DataManager.getConfig('show_pdf_download', true);
+  saveImgBtn.style.display = showPdf ? 'inline-block' : 'none';
+
+  const showShare = await DataManager.getConfig('show_share_button', true);
+  const shareRow = document.querySelector('.share-buttons-row');
+  if (shareRow) shareRow.style.display = showShare ? 'flex' : 'none';
   
   // 추천 상품 및 배너 렌더링
   renderTopBanner();
@@ -350,6 +369,17 @@ async function renderTopBanner() {
   const container = document.getElementById('top-ad-container');
   if (!container) return;
 
+  const showAds = await DataManager.getConfig('show_ads', true);
+  if (!showAds) {
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = ''; // Reset to CSS defined display (fixes mobile bug)
+  
+  // Dynamic Reordering
+  const order = await DataManager.getConfig('top_banner_order', 1);
+  container.style.order = order;
+
   if (window.ENV.ENABLE_ADSENSE) {
     // Inject AdSense Top Banner code here
     container.innerHTML = `
@@ -383,6 +413,17 @@ async function renderBottomBanner() {
   const container = document.getElementById('bottom-ad-container');
   if (!container) return;
 
+  const showAds = await DataManager.getConfig('show_ads', true);
+  if (!showAds) {
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = ''; // Reset to CSS defined display (fixes mobile bug)
+
+  // Dynamic Reordering
+  const order = await DataManager.getConfig('bottom_banner_order', 5);
+  container.style.order = order;
+
   if (window.ENV.ENABLE_ADSENSE) {
     // Inject AdSense Bottom Banner code here
     container.innerHTML = `
@@ -414,32 +455,74 @@ async function renderBottomBanner() {
 
 // Render Recommended Products
 async function renderRecommendedProducts() {
+  const section = document.getElementById('recommended-products-section');
   const grid = document.getElementById('recommended-grid');
-  if (!grid) return;
+  if (!grid || !section) return;
   
+  // Dynamic Reordering
+  const recOrder = await DataManager.getConfig('recommended_order', 3);
+  section.style.order = recOrder;
+
+  const showRec = await DataManager.getConfig('show_recommended_products', true);
+  if (!showRec) {
+    section.style.display = 'none';
+    // Even if hidden, we shouldn't return yet because we need to process Coupang Disclaimer
+  } else {
+    section.style.display = 'block';
+  }
+
   const recommendedProducts = await DataManager.getRecommendedAds();
   
   // Feature toggle: Coupang Disclaimer
-  const showDisclaimer = await DataManager.isFeatureEnabled('SHOW_COUPANG_DISCLOSURE');
+  const showDisclaimer = await DataManager.isFeatureEnabled('show_coupang_notice');
   const disclaimerEl = document.getElementById('partners-disclaimer');
   if (disclaimerEl) {
     if (showDisclaimer) {
-      const disclaimerText = await DataManager.getConfig('COUPANG_DISCLOSURE_TEXT', '"이 페이지의 일부 추천 링크는 쿠팡 파트너스 활동의 일환으로,<br>이에 따른 일정액의 수수료를 제공받을 수 있습니다."');
-      disclaimerEl.innerHTML = disclaimerText;
+      const disclaimerOrder = await DataManager.getConfig('coupang_notice_order', 4);
+      disclaimerEl.style.order = disclaimerOrder;
+      
+      const defaultText = `이 페이지의 일부 추천 링크는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받을 수 있습니다.\n발생한 수익은 더 좋은 심리테스트, 인지훈련 앱·웹서비스·게임의 개발 및 운영에 활용됩니다.`;
+      
+      const title = await DataManager.getConfig('coupang_notice_title', '');
+      const text = await DataManager.getConfig('coupang_notice_text', defaultText);
+      
+      let html = '';
+      if (title) {
+        html += `<strong>${title}</strong><br><br>`;
+      }
+      if (text) {
+        html += text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+      }
+      
+      disclaimerEl.innerHTML = html;
+      
+      const fontSize = await DataManager.getConfig('coupang_notice_font_size');
+      if (fontSize) disclaimerEl.style.fontSize = `${fontSize}px`;
+      
+      const color = await DataManager.getConfig('coupang_notice_color');
+      if (color) disclaimerEl.style.color = color;
+      
+      const align = await DataManager.getConfig('coupang_notice_align');
+      if (align) disclaimerEl.style.textAlign = align;
+
       disclaimerEl.style.display = 'block';
     } else {
       disclaimerEl.style.display = 'none';
     }
   }
   
+  if (!showRec) return;
+
   if (!recommendedProducts || recommendedProducts.length === 0) {
     grid.innerHTML = '<p>현재 추천 상품이 없습니다.</p>';
     return;
   }
 
   grid.innerHTML = '';
-  // 10. RecommendedProductsSection should render 4 cards
-  const adsToRender = recommendedProducts.slice(0, 4);
+  // Feature Toggle: Recommended Count
+  let maxCards = await DataManager.getConfig('recommended_count', 4);
+  maxCards = parseInt(maxCards) || 4;
+  const adsToRender = recommendedProducts.slice(0, maxCards);
   
   adsToRender.forEach(item => {
     const card = document.createElement('a');

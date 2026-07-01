@@ -683,13 +683,21 @@ button:active {
   text-align: center;
 }
 
+/* Dynamic Widgets Area */
+#dynamic-widgets-area {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .partners-disclaimer {
-  font-size: 11px;
+  font-size: 13px;
   color: #999;
   text-align: center;
-  margin-top: 24px;
-  line-height: 1.5;
+  margin: 24px auto;
+  line-height: 1.6;
   word-break: keep-all;
+  font-weight: 400;
 }
 
 @media (max-width: 768px) {
@@ -716,7 +724,7 @@ button:active {
     font-size: 12px;
   }
   .partners-disclaimer {
-    font-size: 10px;
-    margin-top: 20px;
+    font-size: 12px;
+    margin: 20px auto;
   }
 }
