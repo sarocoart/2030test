@@ -42,16 +42,20 @@ let realScores = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
 
 // Initialization
 async function init() {
-  await DataManager.init();
-  
-  // Platform Name Toggle
-  const platformName = await DataManager.getConfig('platform_name');
-  if (platformName) {
-    document.title = platformName;
-    const titleEl = document.querySelector('.intro-container .title');
-    if (titleEl) {
-      titleEl.innerHTML = platformName;
+  try {
+    await DataManager.init();
+    
+    // Platform Name Toggle
+    const platformName = await DataManager.getConfig('platform_name');
+    if (platformName) {
+      document.title = platformName;
+      const titleEl = document.querySelector('.intro-container .title');
+      if (titleEl) {
+        titleEl.innerHTML = platformName;
+      }
     }
+  } catch (error) {
+    console.error("Failed to initialize DataManager or load config. Using safe defaults.", error);
   }
 
   const today = new Date();
@@ -61,14 +65,6 @@ async function init() {
     Analytics.track('visit');
     localStorage.setItem('vibe_has_visited', 'true');
   }
-
-  startBtn.addEventListener('click', startQuiz);
-  optionA.addEventListener('click', () => handleOptionClick(0));
-  optionB.addEventListener('click', () => handleOptionClick(1));
-  retryBtn.addEventListener('click', resetQuiz);
-  copyLinkBtn.addEventListener('click', shareLink);
-  shareResultBtn.addEventListener('click', shareResultDetailed);
-  saveImgBtn.addEventListener('click', saveDiagnosisAsImage);
 }
 
 // Start Quiz
@@ -474,40 +470,45 @@ async function renderRecommendedProducts() {
   const recommendedProducts = await DataManager.getRecommendedAds();
   
   // Feature toggle: Coupang Disclaimer
-  const showDisclaimer = await DataManager.isFeatureEnabled('show_coupang_notice');
   const disclaimerEl = document.getElementById('partners-disclaimer');
   if (disclaimerEl) {
-    if (showDisclaimer) {
-      const disclaimerOrder = await DataManager.getConfig('coupang_notice_order', 4);
-      disclaimerEl.style.order = disclaimerOrder;
-      
-      const defaultText = `이 페이지의 일부 추천 링크는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받을 수 있습니다.\n발생한 수익은 더 좋은 심리테스트, 인지훈련 앱·웹서비스·게임의 개발 및 운영에 활용됩니다.`;
-      
-      const title = await DataManager.getConfig('coupang_notice_title', '');
-      const text = await DataManager.getConfig('coupang_notice_text', defaultText);
-      
-      let html = '';
-      if (title) {
-        html += `<strong>${title}</strong><br><br>`;
-      }
-      if (text) {
-        html += text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
-      }
-      
-      disclaimerEl.innerHTML = html;
-      
-      const fontSize = await DataManager.getConfig('coupang_notice_font_size');
-      if (fontSize) disclaimerEl.style.fontSize = `${fontSize}px`;
-      
-      const color = await DataManager.getConfig('coupang_notice_color');
-      if (color) disclaimerEl.style.color = color;
-      
-      const align = await DataManager.getConfig('coupang_notice_align');
-      if (align) disclaimerEl.style.textAlign = align;
+    try {
+      const showDisclaimer = await DataManager.isFeatureEnabled('show_coupang_notice');
+      if (showDisclaimer) {
+        const disclaimerOrder = await DataManager.getConfig('coupang_notice_order', 4);
+        disclaimerEl.style.order = disclaimerOrder;
+        
+        const defaultText = `이 페이지의 일부 추천 링크는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받을 수 있습니다.\n발생한 수익은 더 좋은 심리테스트, 인지훈련 앱·웹서비스·게임의 개발 및 운영에 활용됩니다.`;
+        
+        const title = await DataManager.getConfig('coupang_notice_title', '');
+        const text = await DataManager.getConfig('coupang_notice_text', defaultText);
+        
+        let html = '';
+        if (title) {
+          html += `<strong>${title}</strong><br><br>`;
+        }
+        if (text) {
+          html += text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+        }
+        
+        disclaimerEl.innerHTML = html;
+        
+        const fontSize = await DataManager.getConfig('coupang_notice_font_size');
+        if (fontSize) disclaimerEl.style.fontSize = `${fontSize}px`;
+        
+        const color = await DataManager.getConfig('coupang_notice_color');
+        if (color) disclaimerEl.style.color = color;
+        
+        const align = await DataManager.getConfig('coupang_notice_align');
+        if (align) disclaimerEl.style.textAlign = align;
 
-      disclaimerEl.style.display = 'block';
-    } else {
-      disclaimerEl.style.display = 'none';
+        disclaimerEl.style.display = 'block';
+      } else {
+        disclaimerEl.style.display = 'none';
+      }
+    } catch (error) {
+      console.error("Failed to render Coupang Notice", error);
+      disclaimerEl.style.display = 'none'; // Safe fallback
     }
   }
   
@@ -552,6 +553,15 @@ async function renderRecommendedProducts() {
 
 // Start & Global Listeners
 window.addEventListener('DOMContentLoaded', () => {
+  // Register critical UI event listeners synchronously so they never fail due to config/API issues
+  if (startBtn) startBtn.addEventListener('click', startQuiz);
+  if (optionA) optionA.addEventListener('click', () => handleOptionClick(0));
+  if (optionB) optionB.addEventListener('click', () => handleOptionClick(1));
+  if (retryBtn) retryBtn.addEventListener('click', resetQuiz);
+  if (copyLinkBtn) copyLinkBtn.addEventListener('click', shareLink);
+  if (shareResultBtn) shareResultBtn.addEventListener('click', shareResultDetailed);
+  if (saveImgBtn) saveImgBtn.addEventListener('click', saveDiagnosisAsImage);
+
   init();
 
   // Exit tracking logic
